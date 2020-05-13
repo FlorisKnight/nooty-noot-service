@@ -5,7 +5,7 @@ import javax.persistence.Id;
 
 @Entity
 public class Noot {
-    @Id
+
     public String getId() {
         return id;
     }

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
-public class PublishNootSender {
+public class LiveNootsSender {
     private final static String QUEUE_NAME = "noots";
 
     public void sendNootToSubs(String msg) {
