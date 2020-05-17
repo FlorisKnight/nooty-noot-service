@@ -44,13 +44,12 @@ public class NootController {
         noot.setTimestamp(createViewModel.getTimestamp());
         noot.setUserId(createViewModel.getUserId());
 
-        //TODO check text for hashtag and send to hashtag rabbitmq que
-        //TODO send to subscriber on rabbitmq que
-
         this.nootRepo.save(noot);
 
+        /* This will send a noot to online users.
         liveNootsSender.sendNootToSubs(gson.toJson(noot));
 
+        this will check if the noot contains any hashtags and will send it to the hashtag service
         List<String> hashTags = checkHashtag(noot);
         if (hashTags.size() != 0) {
             for (String h: hashTags) {
@@ -60,7 +59,8 @@ public class NootController {
                 hashtagSender.newHashtag(gson.toJson(hvm));
             }
         }
-        return ResponseEntity.ok().build();
+         */
+        return ResponseEntity.ok(noot);
     }
 
     @GetMapping(path = "/{id}", produces = "application/json")
@@ -84,18 +84,18 @@ public class NootController {
         return ResponseEntity.ok(noots);
     }
 
-    @GetMapping(path = "user/{id}", produces = "application/json")
+    @PostMapping(path = "user/{id}", produces = "application/json")
     public ResponseEntity getFromUser(@PathVariable String id, @RequestBody GetFromUserViewModel getFromUserViewModel) {
-        Optional<Noot> nootOptional = this.nootRepo.findById(id);
-        if (!nootOptional.isPresent()) {
-            return ResponseEntity.status(404).build();
-        }
+        List<Noot> noots = new ArrayList<Noot>();
 
-        Noot noot = nootOptional.get();
-        return ResponseEntity.ok(noot);
+        this.nootRepo.findAllByUserId(id).forEach(noot -> {
+            noots.add(noot);
+        });
+
+        return ResponseEntity.ok(noots);
     }
 
-    @GetMapping(path = "timeline/{id}", produces = "application/json")
+    @PostMapping(path = "timeline/{id}", produces = "application/json")
     public ResponseEntity getTimeLine(@PathVariable String id, @RequestBody GetTimelineViewModel getTimelineViewModel) {
         List<Noot> noots = new ArrayList<Noot>();
 
@@ -103,9 +103,16 @@ public class NootController {
             noots.add(noot);
         });
 
-        int startIndex = getStartIndex(noots, getTimelineViewModel.getLastId());
-        List<Noot> nootsTimeline = getSelectNootsTimeline(noots, startIndex, getTimelineViewModel.getUserIds(), getTimelineViewModel.getAmmount());
-
+        // int startIndex = getStartIndex(noots, getTimelineViewModel.getLastId());
+        // List<Noot> nootsTimeline = getSelectNootsTimeline(noots, startIndex, getTimelineViewModel.getUserIds(), getTimelineViewModel.getAmmount());
+        List<Noot> nootsTimeline = new ArrayList<>();
+        for (Noot noot: noots) {
+            for (String userId: getTimelineViewModel.getUserIds()) {
+                if (noot.getUserId().equals(userId)) {
+                    nootsTimeline.add(noot);
+                }
+            }
+        }
         return ResponseEntity.ok(nootsTimeline);
     }
 
