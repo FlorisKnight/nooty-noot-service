@@ -15,7 +15,7 @@ public class HashtagSender {
 
     public void newHashtag(String msg) {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost("127.0.0.1:32773");
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
             channel.queueDeclare(QUEUE_NAME_CREATE, false, false, false, null);

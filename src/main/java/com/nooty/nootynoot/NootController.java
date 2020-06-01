@@ -110,6 +110,7 @@ public class NootController {
             for (String userId: getTimelineViewModel.getUserIds()) {
                 if (noot.getUserId().equals(userId)) {
                     nootsTimeline.add(noot);
+                    break;
                 }
             }
         }
