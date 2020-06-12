@@ -2,7 +2,7 @@ package com.nooty.nootynoot;
 
 import com.google.gson.Gson;
 import com.nooty.nootynoot.messaging.HashtagSender;
-import com.nooty.nootynoot.messaging.LiveNootsSender;
+import com.nooty.nootynoot.messaging.NootReceiver;
 import com.nooty.nootynoot.models.Noot;
 import com.nooty.nootynoot.viewmodels.CreateViewModel;
 import com.nooty.nootynoot.viewmodels.GetFromUserViewModel;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.StyledEditorKit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,12 +26,10 @@ public class NootController {
     @Autowired
     private NootRepo nootRepo;
     private HashtagSender hashtagSender;
-    private LiveNootsSender liveNootsSender;
     private Gson gson;
 
     public NootController() {
         this.hashtagSender = new HashtagSender();
-        this.liveNootsSender = new LiveNootsSender();
         this.gson = new Gson();
     }
 
