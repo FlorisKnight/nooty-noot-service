@@ -43,20 +43,17 @@ public class NootController {
 
         this.nootRepo.save(noot);
 
-        /* This will send a noot to online users.
-        liveNootsSender.sendNootToSubs(gson.toJson(noot));
-
-        this will check if the noot contains any hashtags and will send it to the hashtag service
+        // this will check if the noot contains any hashtags and will send it to the hashtag service
         List<String> hashTags = checkHashtag(noot);
         if (hashTags.size() != 0) {
             for (String h: hashTags) {
                 HashtagViewModel hvm = new HashtagViewModel();
-                hvm.getUserId();
+                hvm.setUserId(noot.getUserId());
+                hvm.setNootId(noot.getId());
                 hvm.setHashtag(h);
                 hashtagSender.newHashtag(gson.toJson(hvm));
             }
         }
-         */
         return ResponseEntity.ok(noot);
     }
 
@@ -125,12 +122,9 @@ public class NootController {
 
         List<String> hashTags = checkHashtag(noot);
         if (hashTags.size() != 0) {
-            for (String h: hashTags) {
-                HashtagViewModel hvm = new HashtagViewModel();
-                hvm.getUserId();
-                hvm.setHashtag(h);
-                hashtagSender.deleteHashtag(gson.toJson(hvm));
-            }
+            HashtagViewModel hashtagViewModel = new HashtagViewModel();
+            hashtagViewModel.setNootId(noot.getId());
+            hashtagSender.deleteHashtag(gson.toJson(hashtagViewModel));
         }
 
         return ResponseEntity.ok().build();

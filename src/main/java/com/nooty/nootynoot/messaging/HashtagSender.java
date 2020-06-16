@@ -15,32 +15,27 @@ public class HashtagSender {
 
     public void newHashtag(String msg) {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("127.0.0.1:32773");
+        factory.setHost("nooty-rabbitmq");
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
             channel.queueDeclare(QUEUE_NAME_CREATE, false, false, false, null);
-            String message = msg;
-            channel.basicPublish("", QUEUE_NAME_CREATE, null, message.getBytes(StandardCharsets.UTF_8));
-            System.out.println(" [x] Sent '" + message + "'");
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            channel.basicPublish("", QUEUE_NAME_CREATE, null, msg.getBytes(StandardCharsets.UTF_8));
+            System.out.println(" [x] Sent '" + msg + "'");
+        } catch (TimeoutException | IOException e) {
             e.printStackTrace();
         }
     }
 
     public void deleteHashtag(String msg) {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost("nooty-rabbitmq");
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
             channel.queueDeclare(QUEUE_NAME_DELETE, false, false, false, null);
             String message = msg;
             channel.basicPublish("", QUEUE_NAME_DELETE, null, message.getBytes(StandardCharsets.UTF_8));
             System.out.println(" [x] Sent '" + message + "'");
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (TimeoutException | IOException e) {
             e.printStackTrace();
         }
     }

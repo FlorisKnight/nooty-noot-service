@@ -3,6 +3,7 @@ package com.nooty.nootynoot.messaging;
 import com.google.gson.Gson;
 import com.nooty.nootynoot.NootRepo;
 import com.nooty.nootynoot.models.Noot;
+import com.nooty.nootynoot.viewmodels.HashtagViewModel;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -12,11 +13,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 public class NootReceiver{
+    private HashtagSender hashtagSender;
 
     @Autowired
     private NootRepo nootRepo;
@@ -24,11 +30,12 @@ public class NootReceiver{
     private Gson gson;
     private final static String QUEUE_NAME = "noots";
 
-    public NootReceiver(NootRepo nootRepo) throws Exception{
+    public NootReceiver() throws Exception{
+        hashtagSender = new HashtagSender();
         gson = new Gson();
         ConnectionFactory factory = new ConnectionFactory();
-        //factory.setHost("localhost");
-        factory.setHost("172.18.0.20");
+        factory.setHost("nooty-rabbitmq");
+        //factory.setHost("172.18.0.20");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
@@ -46,20 +53,27 @@ public class NootReceiver{
         Noot noot = gson.fromJson(data, Noot.class);
         this.nootRepo.save(noot);
 
-        /* This will send a noot to online users.
-        liveNootsSender.sendNootToSubs(gson.toJson(noot));
-
-        this will check if the noot contains any hashtags and will send it to the hashtag service
+        // this will check if the noot contains any hashtags and will send it to the hashtag service
         List<String> hashTags = checkHashtag(noot);
         if (hashTags.size() != 0) {
             for (String h: hashTags) {
                 HashtagViewModel hvm = new HashtagViewModel();
-                hvm.getUserId();
+                hvm.setUserId(noot.getUserId());
+                hvm.setNootId(noot.getId());
                 hvm.setHashtag(h);
                 hashtagSender.newHashtag(gson.toJson(hvm));
             }
         }
-         */
+    }
+
+    private List<String> checkHashtag(Noot noot) {
+        Pattern patt = Pattern.compile("(#\\w+)\\b", Pattern.CASE_INSENSITIVE);
+        Matcher match = patt.matcher(noot.getText());
+        List<String> matStr = new ArrayList<String>();
+        while (match.find()) {
+            matStr.add(match.group(1));
+        }
+        return matStr;
     }
 
 }
